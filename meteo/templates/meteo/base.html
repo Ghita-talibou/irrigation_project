@@ -1,0 +1,332 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}METEO STATION{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <link rel="stylesheet" href="{% static 'css/meteo.css' %}">
+  <style>
+    .metric-card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      height: 100%;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .metric-unit {
+      font-size: 1rem;
+      color: #6c757d;
+      margin-left: 2px;
+    }
+  </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="bi bi-sun-fill text-warning fs-3"></i>
+                <h5 class="mb-0">METEO STATION</h5>
+                <small class="text-muted">Weather Monitoring</small>
+            </div>
+            <nav class="nav flex-column mt-4">
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
+                </a>
+                <a class="nav-link {% if active_page == 'temp' %}active{% endif %}" href="{% url 'detail' 'temp' %}">
+                    <i class="bi bi-thermometer-half me-2"></i> Température
+                </a>
+                <a class="nav-link {% if active_page == 'hum' %}active{% endif %}" href="{% url 'detail' 'hum' %}">
+                    <i class="bi bi-droplet-fill me-2"></i> Humidité
+                </a>
+                <a class="nav-link {% if active_page == 'vent' %}active{% endif %}" href="{% url 'detail' 'vent' %}">
+                    <i class="bi bi-wind me-2"></i> Vent
+                </a>
+                <a class="nav-link {% if active_page == 'precip' %}active{% endif %}" href="{% url 'detail' 'precip' %}">
+                    <i class="bi bi-cloud-rain me-2"></i> Précipitation
+                </a>
+                <a class="nav-link {% if active_page == 'rad' %}active{% endif %}" href="{% url 'detail' 'rad' %}">
+                    <i class="bi bi-sun me-2"></i> Rayonnement
+                </a>
+                <a class="nav-link {% if active_page == 'uv' %}active{% endif %}" href="{% url 'detail' 'uv' %}">
+                    <i class="bi bi-brightness-high me-2"></i> UV
+                </a>
+                <a class="nav-link {% if active_page == 'fwi' %}active{% endif %}" href="{% url 'detail' 'fwi' %}">
+                    <i class="bi bi-fire me-2"></i> FWI
+                </a>
+                <a class="nav-link {% if active_page == 'et0' %}active{% endif %}" href="{% url 'detail' 'et0' %}">
+                    <i class="bi bi-moisture me-2"></i> ET0
+                </a>
+                <a class="nav-link {% if active_page == 'batterie' %}active{% endif %}" href="{% url 'detail' 'batterie' %}">
+                    <i class="bi bi-battery-charging me-2"></i> Batterie
+                </a>
+            </nav>
+        </div>
+        <!-- CONTENU -->
+        <main class="main-content flex-grow-1">
+            <header class="topbar mb-4">
+                <h1>{% block page_title %}{% endblock %}</h1>
+                <p class="text-muted">{% block page_subtitle %}{% endblock %}</p>
+            </header>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('canvas[id^="gauge"]').forEach(canvas => {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const cx = w/2, cy = h, r = Math.min(w, h*2)*0.45;
+
+    // Récupère valeurs
+const card = canvas.closest('.card-body');
+
+const valText = card.querySelector('h3').textContent.replace(',', '.');
+const val = parseFloat(valText);
+
+if (isNaN(val)) {
+  return;
+}
+
+const unit = canvas.dataset.unit || '';
+const cardTitle = card.querySelector('.text-muted').innerText.toUpperCase();
+
+let min = 0;
+let max = 100;
+
+if(cardTitle.includes('TEMPÉRATURE')) {
+  min = 0;
+  max = 50;
+}
+else if(cardTitle.includes('HUMIDITÉ')) {
+  min = 0;
+  max = 100;
+}
+else if(cardTitle.includes('VENT')) {
+  min = 0;
+  max = 80;
+}
+else if(cardTitle.includes('PRECIPITATION') || cardTitle.includes('PRÉCIPITATION')) {
+  min = 0;
+  max = 50;
+}
+else if(cardTitle.includes('RAYONNEMENT')) {
+  min = 0;
+  max = 1200;
+}
+else if(cardTitle.includes('UV')) {
+  min = 0;
+  max = 11;
+}
+else if(cardTitle.includes('FWI')) {
+  min = 0;
+  max = 50;
+}
+else if(cardTitle.includes('ET0')) {
+  min = 0;
+  max = 15;
+}
+else if(cardTitle.includes('BATTERIE')) {
+  min = 0;
+  max = 100;
+}
+const minSpan = card.querySelector('.gauge-min');
+const maxSpan = card.querySelector('.gauge-max');
+
+if (minSpan) minSpan.innerHTML = min;
+if (maxSpan) maxSpan.innerHTML = max;
+
+    // Dessin gauge
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, 2*Math.PI);
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = '#2a2a2a';
+    ctx.stroke();
+
+    const ratio = Math.max(0, Math.min(1, (val - min) / (max - min || 1)));
+    const angle = Math.PI + ratio * Math.PI;
+
+    const grad = ctx.createLinearGradient(0, 0, w, 0);
+
+if(cardTitle.includes('TEMPÉRATURE')) {
+  grad.addColorStop(0, '#ffe5e5');
+  grad.addColorStop(0.5, '#ff6b6b');
+  grad.addColorStop(1, '#8b0000');
+}
+else if(cardTitle.includes('HUMIDITÉ')) {
+  grad.addColorStop(0, '#e3f2fd');
+  grad.addColorStop(0.5, '#2196f3');
+  grad.addColorStop(1, '#0d47a1');
+}
+else if(cardTitle.includes('VENT')) {
+  grad.addColorStop(0, '#e0f7fa');
+  grad.addColorStop(0.5, '#26c6da');
+  grad.addColorStop(1, '#006064');
+}
+else if(cardTitle.includes('PRECIPITATION') || cardTitle.includes('PRÉCIPITATION')) {
+  grad.addColorStop(0, '#e1f5fe');
+  grad.addColorStop(0.5, '#03a9f4');
+  grad.addColorStop(1, '#01579b');
+}
+else if(cardTitle.includes('RAYONNEMENT')) {
+  grad.addColorStop(0, '#fff8e1');
+  grad.addColorStop(0.5, '#ffc107');
+  grad.addColorStop(1, '#ff6f00');
+}
+else if(cardTitle.includes('UV')) {
+  grad.addColorStop(0, '#fff9c4');
+  grad.addColorStop(0.5, '#ff9800');
+  grad.addColorStop(1, '#6a1b9a');
+}
+else if(cardTitle.includes('FWI')) {
+  grad.addColorStop(0, '#ffebee');
+  grad.addColorStop(0.5, '#f44336');
+  grad.addColorStop(1, '#7f0000');
+}
+else if(cardTitle.includes('ET0')) {
+  grad.addColorStop(0, '#e8f5e9');
+  grad.addColorStop(0.5, '#4caf50');
+  grad.addColorStop(1, '#1b5e20');
+}
+else if(cardTitle.includes('BAT')) {
+    grad.addColorStop(0, '#b7e4c7'); // vert clair
+    grad.addColorStop(0.5, '#52b788'); // vert moyen
+    grad.addColorStop(1, '#1b4332'); // vert foncé
+}
+else {
+  grad.addColorStop(0, '#e9ecef');
+  grad.addColorStop(1, '#0d6efd');
+}
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI, angle);
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = grad;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Aiguille
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(-8, 0);
+    ctx.lineTo(r-5, 0);
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+    ctx.restore();
+
+    // Point central
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, 2*Math.PI);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+
+
+
+//     // Min/Max
+//     ctx.font = '12px Arial';
+//     ctx.fillStyle = '#333';
+//     // MIN à gauche en bas
+// ctx.textAlign = 'left';
+// ctx.fillText(min, cx - r + 5, cy + 10);
+
+// // MAX à droite en bas
+// ctx.textAlign = 'right';
+// ctx.fillText(max, cx + r - 5, cy + 10);
+
+    // === MESSAGES STATUT - Ton ancien code ===
+   let titleDiv = card.querySelector('.gauge-status');
+    // === TEMPÉRATURE (rouge)
+if(cardTitle.includes('TEMPÉRATURE')) {
+  if(val < 10) { statusText = 'FROID'; statusColor = '#ffb3b3'; }
+  else if(val < 25) { statusText = 'CONFORT'; statusColor = '#ff6666'; }
+  else if(val < 35) { statusText = 'CHAUD'; statusColor = '#dc3545'; }
+  else { statusText = 'TRÈS CHAUD'; statusColor = '#7f0000'; }
+}
+
+// === HUMIDITÉ (bleu)
+else if(cardTitle.includes('HUMIDITÉ')) {
+  if(val < 30) { statusText = 'SÈCHE'; statusColor = '#b3d9ff'; }
+  else if(val < 70) { statusText = 'NORMALE'; statusColor = '#0d6efd'; }
+  else { statusText = 'HUMIDE'; statusColor = '#003d99'; }
+}
+
+// === VENT (cyan)
+else if(cardTitle.includes('VENT')) {
+  if(val < 10) { statusText = 'CALME'; statusColor = '#b2f5ff'; }
+  else if(val < 25) { statusText = 'MODÉRÉ'; statusColor = '#0dcaf0'; }
+  else if(val < 40) { statusText = 'FORT'; statusColor = '#008fb3'; }
+  else { statusText = 'VIOLENT'; statusColor = '#004d66'; }
+}
+
+// === PRÉCIPITATION (bleu pluie)
+else if(cardTitle.includes('PLUIE') || cardTitle.includes('PRECIPITATION') || cardTitle.includes('PRÉCIPITATION')) {
+  if(val == 0) { statusText = 'SEC'; statusColor = '#d6eaff'; }
+  else if(val < 5) { statusText = 'FAIBLE'; statusColor = '#66b3ff'; }
+  else if(val < 20) { statusText = 'MODÉRÉE'; statusColor = '#0d6efd'; }
+  else { statusText = 'FORTE'; statusColor = '#003d99'; }
+}
+
+// === RAYONNEMENT (jaune/orange)
+else if(cardTitle.includes('RAYONNEMENT')) {
+  if(val < 200) { statusText = 'FAIBLE'; statusColor = '#fff3b0'; }
+  else if(val < 600) { statusText = 'MODÉRÉ'; statusColor = '#ffc107'; }
+  else if(val < 1000) { statusText = 'FORT'; statusColor = '#ff8c00'; }
+  else { statusText = 'TRÈS FORT'; statusColor = '#cc6600'; }
+}
+
+// === UV (violet)
+else if(cardTitle.includes('UV')) {
+  if(val < 3) { statusText = 'FAIBLE'; statusColor = '#fff3b0'; }      // jaune clair
+  else if(val < 6) { statusText = 'MODÉRÉ'; statusColor = '#ffc107'; } // jaune
+  else if(val < 8) { statusText = 'ÉLEVÉ'; statusColor = '#ff8c00'; }  // orange
+  else { statusText = 'EXTRÊME'; statusColor = '#cc6600'; }            // orange foncé
+}
+
+// === FWI (rouge incendie)
+else if(cardTitle.includes('FWI')) {
+  if(val < 5) { statusText = 'FAIBLE'; statusColor = '#ffb3b3'; }
+  else if(val < 12) { statusText = 'MODÉRÉ'; statusColor = '#ff6666'; }
+  else if(val < 30) { statusText = 'ÉLEVÉ'; statusColor = '#dc3545'; }
+  else { statusText = 'EXTRÊME'; statusColor = '#7f0000'; }
+}
+
+// === ET0 (vert)
+else if(cardTitle.includes('ET0')) {
+  if(val < 3) { statusText = 'FAIBLE'; statusColor = '#b7e4c7'; }
+  else if(val < 6) { statusText = 'MODÉRÉ'; statusColor = '#52b788'; }
+  else if(val < 9) { statusText = 'ÉLEVÉ'; statusColor = '#2d6a4f'; }
+  else { statusText = 'TRÈS ÉLEVÉ'; statusColor = '#1b4332'; }
+}
+
+// === BAT-PYRA (vert batterie)
+else if(cardTitle.includes('BAT')) {
+  if(val < 20) { statusText = 'CRITIQUE'; statusColor = '#a5d6a7'; }
+  else if(val < 40) { statusText = 'FAIBLE'; statusColor = '#66bb6a'; }
+  else if(val < 70) { statusText = 'MOYEN'; statusColor = '#2e7d32'; }
+  else { statusText = 'OK'; statusColor = '#1b5e20'; }
+}
+
+titleDiv.innerHTML = statusText;
+titleDiv.style.color = statusColor;
+
+  });
+});
+</script>
+{% endblock %}
+</body>
+</html>

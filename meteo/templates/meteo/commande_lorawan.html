@@ -1,0 +1,351 @@
+{% extends 'meteo/base.html' %}
+
+{% block page_title %}Commande LoRaWAN{% endblock %}
+{% block page_subtitle %}Pilotage test des relais et électrovannes via ChirpStack{% endblock %}
+
+{% block content %}
+<div class="alert alert-info shadow-sm mb-4">
+  <strong>Mode test :</strong>
+  cette page permet de préparer les commandes LoRaWAN avant leur envoi vers ChirpStack via HTTP.
+</div>
+<div class="row g-4">
+
+  <!-- RELAIS -->
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">
+        🔌 Relais
+      </div>
+
+      <div class="card-body">
+        <p class="text-muted small">
+          DevEUI : <strong>ab7554dc00001075</strong>
+        </p>
+
+        <div class="d-flex gap-2">
+          <button
+             class="btn btn-success flex-fill"
+             onclick="return genererRelais(this, 'ON');">
+             ON
+          </button>
+
+          <button
+             class="btn btn-danger flex-fill"
+             onclick="return genererRelais(this, 'OFF');">
+             OFF
+          </button>
+        </div>
+        <div class="mt-3">
+          <span class="badge bg-secondary status-badge">
+             🔴 OFF
+          </span>
+        </div>
+        <div class="mt-3 text-muted small">
+          ON = 01 | OFF = 00
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VANNE 1 -->
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">
+        💧 Vanne 1
+      </div>
+
+      <div class="card-body">
+        <p class="text-muted small">
+          DevEUI : <strong>ce7554dc00001057</strong>
+        </p>
+
+        <label class="form-label">Durée d'ouverture (minutes)</label>
+        <input type="number" min="1" class="form-control mb-3" placeholder="Ex : 10" required>
+
+        <div class="d-flex gap-2">
+          <button
+             class="btn btn-success flex-fill"
+             onclick="return verifierDuree(this);">
+             OUVRIR
+          </button>
+          <button
+          class="btn btn-danger flex-fill"
+          onclick="return genererFermeture(this);">
+          FERMER
+         </button>
+        </div>
+        <div class="mt-3">
+           <span class="badge bg-secondary status-badge">
+             🔴 Fermée
+           </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- VANNE 2 -->
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">
+        💧 Vanne 2
+      </div>
+
+      <div class="card-body">
+        <p class="text-muted small">
+          DevEUI : <strong>À renseigner</strong>
+        </p>
+
+        <label class="form-label">Durée d'ouverture (minutes)</label>
+        <input type="number" min="1" class="form-control mb-3" placeholder="Ex : 10" required>
+
+        <div class="d-flex gap-2">
+          <button
+             class="btn btn-success flex-fill"
+             onclick="return verifierDuree(this);">
+             OUVRIR
+          </button>
+          <button
+          class="btn btn-danger flex-fill"
+          onclick="return genererFermeture(this);">
+          FERMER
+          </button>
+        </div>
+        <div class="mt-3">
+           <span class="badge bg-secondary status-badge">
+             🔴 Fermée
+           </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- VANNE 3 -->
+  <div class="col-md-6 col-lg-3">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-bold">
+        💧 Vanne 3
+      </div>
+
+      <div class="card-body">
+        <p class="text-muted small">
+          DevEUI : <strong>À renseigner</strong>
+        </p>
+
+        <label class="form-label">Durée d'ouverture (minutes)</label>
+        <input type="number" min="1" class="form-control mb-3" placeholder="Ex : 10" required>
+
+        <div class="d-flex gap-2">
+          <button
+             class="btn btn-success flex-fill"
+             onclick="return verifierDuree(this);">
+             OUVRIR
+          </button>
+          <button
+            class="btn btn-danger flex-fill"
+            onclick="return genererFermeture(this);">
+            FERMER
+          </button>
+        </div>
+        <div class="mt-3">
+          <span class="badge bg-secondary status-badge">
+             🔴 Fermée
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+<hr class="my-4">
+
+<div class="card shadow-sm">
+  <div class="card-header fw-bold">
+    📜 Historique récent des commandes
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Équipement</th>
+            <th>Action</th>
+            <th>Payload</th>
+            <th>Durée</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for cmd in commandes %}
+          <tr>
+            <td>{{ cmd.date_commande|date:"d/m/Y H:i" }}</td>
+            <td>{{ cmd.equipement }}</td>
+            <td>{{ cmd.action }}</td>
+            <td><span class="badge bg-dark">{{ cmd.payload }}</span></td>
+            <td>
+              {% if cmd.duree %}
+                {{ cmd.duree }} min
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td><span class="badge bg-secondary">{{ cmd.statut }}</span></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">
+              Aucune commande enregistrée.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+function minuteToHex(minutes) {
+  let value = parseInt(minutes);
+
+  if (isNaN(value) || value <= 0) {
+    return null;
+  }
+
+  let hex = value.toString(16).toUpperCase();
+
+  if (hex.length < 2) {
+    hex = "0" + hex;
+  }
+
+  return hex;
+}
+
+function verifierDuree(button) {
+  const card = button.closest('.card');
+  const input = card.querySelector('input[type="number"]');
+  const badge = card.querySelector('.badge');
+
+  if (!input.value || input.value <= 0) {
+    alert("Veuillez saisir une durée d'ouverture avant d'envoyer la commande.");
+    input.focus();
+    return false;
+  }
+
+  const dureeHex = minuteToHex(input.value);
+  const payload = "01" + dureeHex;
+
+  badge.className = "badge bg-success px-3 py-2 status-badge";
+  badge.innerHTML = "🟢 Ouverte";
+  const equipement = card.querySelector('.card-header').innerText.trim();
+  ajouterHistorique(equipement, "OUVRIR", payload);
+  sauvegarderCommande(
+    equipement,
+    "OUVRIR",
+    payload,
+    parseInt(input.value)
+  );
+  return false;
+}
+
+function genererFermeture(button) {
+  const card = button.closest('.card');
+  const input = card.querySelector('input[type="number"]');
+  const badge = card.querySelector('.badge');
+
+  let dureeHex = "00";
+
+  if (input && input.value && input.value > 0) {
+    dureeHex = minuteToHex(input.value);
+  }
+
+  const payload = "00" + dureeHex;
+
+  badge.className = "badge bg-danger px-3 py-2 status-badge";
+  badge.innerHTML = "🔴 Fermée";
+  const equipement = card.querySelector('.card-header').innerText.trim();
+  ajouterHistorique(equipement, "FERMER", payload);
+  sauvegarderCommande(
+    equipement,
+    "FERMER",
+    payload
+  );
+  return false;
+}
+function genererRelais(button, action) {
+  const card = button.closest('.card');
+  const badge = card.querySelector('.badge');
+
+  let payload = "00";
+
+  if (action === "ON") {
+  payload = "01";
+  badge.className = "badge bg-success px-3 py-2 status-badge";
+  badge.innerHTML = "🟢 ON";
+} else {
+  payload = "00";
+  badge.className = "badge bg-danger px-3 py-2 status-badge";
+  badge.innerHTML = "🔴 OFF";
+}
+  const equipement = card.querySelector('.card-header').innerText.trim();
+  ajouterHistorique(equipement, action, payload);
+  sauvegarderCommande(
+    equipement,
+    action,
+    payload
+  );
+  return false;
+}
+function ajouterHistorique(equipement, action, payload) {
+  console.log("Historique local :", equipement, action, payload);
+}
+function sauvegarderCommande(equipement, action, payload, duree=null) {
+
+    fetch("/enregistrer-commande-lora/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            equipement: equipement,
+            action: action,
+            payload: payload,
+            duree: duree
+        })
+    })
+
+    .then(response => response.json())
+    .then(data => {
+    console.log("Commande enregistrée", data);
+    location.reload();
+    })
+
+    .catch(error => {
+        console.error(error);
+    });
+}
+
+</script>
+<!--<hr class="my-4">-->
+
+<!--<div class="card shadow-sm">-->
+<!--  <div class="card-header fw-bold">-->
+<!--    📜 Historique des commandes-->
+<!--  </div>-->
+
+<!--  <div class="card-body">-->
+<!--    <div id="historique-commandes">-->
+
+<!--      <div class="text-muted">-->
+<!--        Aucune commande envoyée.-->
+<!--      </div>-->
+
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+{% endblock %}

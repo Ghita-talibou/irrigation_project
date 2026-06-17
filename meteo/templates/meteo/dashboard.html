@@ -1,0 +1,52 @@
+{% extends 'meteo/base.html' %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}
+
+<span style="
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+">
+
+{% if last_fwi >= 21 %}
+🔴 🔥 RISQUE INCENDIE CRITIQUE | FWI = {{ last_fwi|floatformat:1 }}
+
+{% elif last_fwi >= 12 %}
+🟠 🔥 RISQUE INCENDIE ÉLEVÉ | FWI = {{ last_fwi|floatformat:1 }}
+
+{% elif last_fwi >= 5 %}
+🟡 🔥 RISQUE INCENDIE MODÉRÉ | FWI = {{ last_fwi|floatformat:1 }}
+
+{% else %}
+🟢 🔥 RISQUE INCENDIE FAIBLE | FWI = {{ last_fwi|floatformat:1 }}
+
+{% endif %}
+
+</span>
+
+{% endblock %}
+{% block content %}
+<div class="cards-grid">
+
+{% include 'meteo/includes/card.html' with icon="thermometer-half" title="TEMPÉRATURE" value=last_temp unit="°C" detail_url="temperature" color="text-danger" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="droplet-half" title="HUMIDITÉ" value=last_humidity unit="%" detail_url="hum" color="text-primary" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="wind" title="VENT" value=last_wind unit="km/h" detail_url="vent" color="text-info" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="cloud-rain" title="PRÉCIPITATION" value=last_rain unit="mm" detail_url="precipitation" color="text-primary" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="brightness-high" title="RAYONNEMENT" value=last_radiation unit="W/m²" detail_url="rayonnement" color="text-warning" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="sunglasses" title="UV" value=last_uv unit="" detail_url="uv" color="text-warning" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="fire" title="FWI" value=last_fwi unit="" detail_url="fwi" color="text-danger" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="droplet-half" title="ET0" value=last_et0 unit="mm/j" detail_url="et0" color="text-success" meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+{% include 'meteo/includes/card.html' with icon="battery-half" title="BAT-PYRA" value=last_batterie unit="%" detail_url="batterie" color="text-success" last_batt_voltage=last_batt_voltage meteo_update=meteo_update ray_update=ray_update batt_update=batt_update fwi_update=fwi_update et0_update=et0_update %}
+
+</div>
+{% endblock %}
+

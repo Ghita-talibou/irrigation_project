@@ -1,0 +1,77 @@
+<div class="card" style="height: 220px; overflow: hidden;">
+  <div class="card-body">
+
+    <div class="text-muted small mb-1">
+      <i class="bi bi-{{ icon }} me-1 {{ color }}"></i> {{ title }}
+    </div>
+
+    <h3 class="mb-0">
+      {% if title == "BAT-PYRA" %}
+        {{ value|floatformat:0|default:"--" }}{{ unit }}
+        <span style="font-size:11px;color:#adb5bd;font-weight:normal;">
+          | {{ last_batt_voltage|floatformat:2 }} V
+        </span>
+      {% else %}
+        {{ value|floatformat:1|default:"--" }}{{ unit }}
+      {% endif %}
+    </h3>
+
+    {% if title == "RAYONNEMENT" %}
+    <div class="text-muted small mt-1">
+       {{ ray_update.text }}  ({{ ray_update.time }})
+    </div>
+
+    {% elif title == "BAT-PYRA" %}
+    <div class="text-muted small mt-1">
+       {{ batt_update.text }}  ({{ batt_update.time }})
+    </div>
+
+    {% elif title == "FWI" %}
+    <div class="text-muted small mt-1">
+       {{ fwi_update.text }}  ({{ fwi_update.time }})
+    </div>
+
+    {% elif title == "ET0" %}
+    <div class="text-muted small mt-1">
+       {{ et0_update.text }}  ({{ et0_update.time }})
+    </div>
+
+    {% else %}
+    <div class="text-muted small mt-1">
+       {{ meteo_update.text }}  ({{ meteo_update.time }})
+    </div>
+    {% endif %}
+
+    <div style="height: 110px; width: 110px; margin: -50px 20px 0 auto; overflow: visible;">
+      <canvas
+        id="gauge{{ title|slugify }}"
+        width="110"
+        height="65"
+        data-min="0"
+        data-max="100"
+        data-unit="{{ unit }}">
+      </canvas>
+
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#555; margin-top:-8px;">
+        <span class="gauge-min">0</span>
+        <span class="gauge-max">100</span>
+      </div>
+    </div>
+
+    <div
+      class="gauge-status text-end"
+      style="
+        margin-top: -15px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-right: 20px;
+        min-height: 26px;
+      ">
+    </div>
+
+    <a href="{% url 'detail' detail_url %}" class="small">
+      Voir détail
+    </a>
+
+  </div>
+</div>
