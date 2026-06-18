@@ -70,6 +70,10 @@
                 <a class="nav-link {% if active_page == 'batterie' %}active{% endif %}" href="{% url 'detail' 'batterie' %}">
                     <i class="bi bi-battery-charging me-2"></i> Batterie
                 </a>
+                <a class="nav-link {% if active_page == 'lorawan' %}active{% endif %}"
+                    href="{% url 'commande_lorawan' %}">
+                    <i class="bi bi-broadcast-pin me-2"></i> Commandes LoRaWAN
+                </a>
             </nav>
         </div>
         <!-- CONTENU -->

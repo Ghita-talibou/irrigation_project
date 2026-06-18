@@ -619,7 +619,7 @@ def v_chirpstack(request):
 @login_required
 def commande_lorawan(request):
 
-    commandes = CommandeLoRaWAN.objects.all()[:10]
+    commandes = CommandeLoRaWAN.objects.all()[:3]
 
     return render(
         request,
@@ -649,4 +649,24 @@ def enregistrer_commande_lora(request):
 
     return JsonResponse({
         "status": "error"
+    })
+
+@login_required
+def historique_commandes_lora(request):
+    commandes = CommandeLoRaWAN.objects.all()
+
+    equipement = request.GET.get("equipement")
+    action = request.GET.get("action")
+
+    if equipement:
+        commandes = commandes.filter(equipement__icontains=equipement)
+
+    if action:
+        commandes = commandes.filter(action=action)
+
+    return render(request, "meteo/historique_commandes_lora.html", {
+        "commandes": commandes,
+        "equipement": equipement,
+        "action": action,
+        "active_page": "lorawan",
     })

@@ -1,0 +1,76 @@
+{% extends 'meteo/base.html' %}
+
+{% block page_title %}Historique LoRaWAN{% endblock %}
+{% block page_subtitle %}Historique complet des commandes avec filtres{% endblock %}
+
+{% block content %}
+<a href="{% url 'commande_lorawan' %}" class="btn btn-outline-secondary mb-3">
+  ← Retour aux commandes
+</a>
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-bold">Filtres</div>
+  <div class="card-body">
+    <form method="get" class="row g-3">
+
+      <div class="col-md-4">
+        <label class="form-label">Équipement</label>
+        <input type="text" name="equipement" class="form-control"
+               placeholder="Relais, Vanne 1..."
+               value="{{ equipement|default:'' }}">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Action</label>
+        <select name="action" class="form-select">
+          <option value="">Toutes</option>
+          <option value="ON" {% if action == "ON" %}selected{% endif %}>ON</option>
+          <option value="OFF" {% if action == "OFF" %}selected{% endif %}>OFF</option>
+          <option value="OUVRIR" {% if action == "OUVRIR" %}selected{% endif %}>OUVRIR</option>
+          <option value="FERMER" {% if action == "FERMER" %}selected{% endif %}>FERMER</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{% url 'historique_commandes_lora' %}" class="btn btn-outline-secondary">Réinitialiser</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header fw-bold">📜 Toutes les commandes LoRaWAN</div>
+  <div class="card-body table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Équipement</th>
+          <th>Action</th>
+          <th>Payload</th>
+          <th>Durée</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cmd in commandes %}
+        <tr>
+          <td>{{ cmd.date_commande|date:"d/m/Y H:i" }}</td>
+          <td>{{ cmd.equipement }}</td>
+          <td>{{ cmd.action }}</td>
+          <td><span class="badge bg-dark">{{ cmd.payload }}</span></td>
+          <td>{% if cmd.duree %}{{ cmd.duree }} min{% else %}-{% endif %}</td>
+          <td><span class="badge bg-secondary">{{ cmd.statut }}</span></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">Aucune commande trouvée.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

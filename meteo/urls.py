@@ -14,4 +14,9 @@ urlpatterns = [
     views.enregistrer_commande_lora,
     name='enregistrer_commande_lora'
     ),
+    path(
+    'historique-commandes-lora/',
+    views.historique_commandes_lora,
+    name='historique_commandes_lora'
+   ),
 ]
