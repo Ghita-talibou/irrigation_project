@@ -214,15 +214,16 @@
 </div>
 <script>
 function minuteToHex(minutes) {
-  let value = parseInt(minutes);
+  let minutesValue = parseInt(minutes);
 
-  if (isNaN(value) || value <= 0) {
+  if (isNaN(minutesValue) || minutesValue <= 0) {
     return null;
   }
 
-  let hex = value.toString(16).toUpperCase();
+  let secondsValue = minutesValue * 60;
+  let hex = secondsValue.toString(16).toUpperCase();
 
-  if (hex.length < 2) {
+  if (hex.length % 2 !== 0) {
     hex = "0" + hex;
   }
 

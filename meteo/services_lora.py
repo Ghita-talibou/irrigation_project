@@ -1,10 +1,9 @@
 import base64
 import requests
 
-
-CHIRPSTACK_API_URL = ""      # à compléter plus tard
-CHIRPSTACK_API_TOKEN = ""    # à compléter plus tard
-FPORT = 10                   # à confirmer avec le prof
+SERVER = "http://157.173.117.156:8080"
+CHIRPSTACK_API_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjaGlycHN0YWNrIiwiZXhwIjoxNzgxNzAwNjM0LCJpc3MiOiJjaGlycHN0YWNrIiwic3ViIjoiMWRjN2I0OGEtY2Q3YS00Yjg1LTljNTMtYzI5NjUzZTgzZGNhIiwidHlwIjoidXNlciJ9.DrR4uD7qhmJfgZFg-WtW8ZGbcWyDNX2DO_HEawpJBDM"
+FPORT = 2
 
 
 def hex_to_base64(payload_hex):
@@ -13,12 +12,13 @@ def hex_to_base64(payload_hex):
 
 
 def envoyer_downlink_chirpstack(dev_eui, payload_hex):
-    if not CHIRPSTACK_API_URL or not CHIRPSTACK_API_TOKEN:
+    if not SERVER or not CHIRPSTACK_API_TOKEN:
         return {
             "success": False,
             "message": "ChirpStack non configuré"
         }
 
+    url = f"{SERVER}/api/devices/{dev_eui}/queue"
     payload_base64 = hex_to_base64(payload_hex)
 
     headers = {
@@ -37,7 +37,7 @@ def envoyer_downlink_chirpstack(dev_eui, payload_hex):
 
     try:
         response = requests.post(
-            CHIRPSTACK_API_URL,
+            url,
             headers=headers,
             json=data,
             timeout=10

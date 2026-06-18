@@ -16,6 +16,8 @@ from .services_lora import envoyer_downlink_chirpstack
 DEVICES = {
     "🔌 Relais": "ab7554dc00001075",
     "💧 Vanne 1": "ce7554dc00001057",
+    "💧 Vanne 2": "2e3554dc00001057",
+    "💧 Vanne 3": "1e4554dc00001057",
 }
 
 def login_view(request):
@@ -659,7 +661,8 @@ def enregistrer_commande_lora(request):
             if resultat["success"]:
                 commande.statut = "ENVOYEE"
             else:
-                commande.statut = "ERREUR"
+               commande.statut = "ERREUR"
+               print(resultat["message"])
 
             commande.save()
 
