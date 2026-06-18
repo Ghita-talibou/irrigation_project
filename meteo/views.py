@@ -11,7 +11,12 @@ import json, random
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from .services_lora import envoyer_downlink_chirpstack
 
+DEVICES = {
+    "🔌 Relais": "ab7554dc00001075",
+    "💧 Vanne 1": "ce7554dc00001057",
+}
 
 def login_view(request):
     error = None
@@ -635,13 +640,28 @@ def enregistrer_commande_lora(request):
 
         data = json.loads(request.body)
 
-        CommandeLoRaWAN.objects.create(
+        commande = CommandeLoRaWAN.objects.create(
             equipement=data.get("equipement"),
             action=data.get("action"),
             payload=data.get("payload"),
             duree=data.get("duree"),
-            statut="Préparée"
+            statut="EN_ATTENTE"
         )
+
+        dev_eui = DEVICES.get(data.get("equipement"))
+
+        if dev_eui:
+            resultat = envoyer_downlink_chirpstack(
+                dev_eui,
+                data.get("payload")
+            )
+
+            if resultat["success"]:
+                commande.statut = "ENVOYEE"
+            else:
+                commande.statut = "ERREUR"
+
+            commande.save()
 
         return JsonResponse({
             "status": "success"
@@ -650,7 +670,6 @@ def enregistrer_commande_lora(request):
     return JsonResponse({
         "status": "error"
     })
-
 @login_required
 def historique_commandes_lora(request):
     commandes = CommandeLoRaWAN.objects.all()
