@@ -267,6 +267,7 @@ def detail(request, param=None):
         labels = [d.date.strftime('%d/%m/%Y') for d in qs]
         data = [float(d.fwi) for d in qs]
         fwi_data = qs
+        dernier_fwi = qs.last()
         context = {
             'param': param,
             'label': 'FWI',
@@ -274,6 +275,7 @@ def detail(request, param=None):
             'labels': json.dumps(labels),
             'data': json.dumps(data),
             'fwi_data': fwi_data,
+            'dernier_fwi': dernier_fwi,
             'date_debut': date_debut.strftime('%Y-%m-%d'),
             'date_fin': date_fin.strftime('%Y-%m-%d'),
         }
@@ -351,6 +353,7 @@ def detail(request, param=None):
         labels = [d.date.strftime('%d/%m/%Y') for d in qs]
         data = [float(d.et0) if d.et0 else 0 for d in qs]
         et0_data = qs
+        dernier_et0 = qs.last()
         context = {
             'param': param,
             'label': 'ET0',
@@ -358,6 +361,7 @@ def detail(request, param=None):
             'labels': json.dumps(labels),
             'data': json.dumps(data),
             'et0_data': et0_data,
+            'dernier_et0': dernier_et0,
             'date_debut': date_debut.strftime('%Y-%m-%d'),
             'date_fin': date_fin.strftime('%Y-%m-%d'),
         }

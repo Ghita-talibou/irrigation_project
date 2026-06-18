@@ -5,8 +5,185 @@
 {% block content %}
 <a href="{% url 'dashboard' %}" class="btn btn-secondary mb-3">← Retour au dashboard</a>
 <div class="container mt-4">
-  <h2 class="mb-4">{{ label }} - du {{ date_debut }} au {{ date_fin }}</h2>
+  {% if param == 'fwi' %}
+    <h2 class="mb-4 fw-bold">🔥 Fire Weather Index (FWI)</h2>
+{% elif param == 'et0' %}
+    <h2 class="mb-4 fw-bold">💧 Reference Evapotranspiration (ET0)</h2>
+{% else %}
+    <h2 class="mb-4">{{ label }} - du {{ date_debut }} au {{ date_fin }}</h2>
+{% endif %}
+{% if param == 'fwi' and dernier_fwi %}
 
+<div class="card mb-4 shadow-sm">
+    <div class="card-body d-flex justify-content-between align-items-center">
+
+        <h3 class="fw-bold mb-0">
+            🔥 FWI = {{ dernier_fwi.fwi|floatformat:1 }}
+        </h3>
+
+        <div style="
+            font-size:1.2rem;
+            font-weight:800;
+            text-transform:uppercase;
+            letter-spacing:1px;
+        ">
+
+        {% if dernier_fwi.fwi >= 21 %}
+            🔴 🔥 RISQUE INCENDIE CRITIQUE
+
+        {% elif dernier_fwi.fwi >= 12 %}
+            🟠 🔥 RISQUE INCENDIE ÉLEVÉ
+
+        {% elif dernier_fwi.fwi >= 5 %}
+            🟡 🔥 RISQUE INCENDIE MODÉRÉ
+
+        {% else %}
+            🟢 🔥 RISQUE INCENDIE FAIBLE
+
+        {% endif %}
+
+        </div>
+
+        <small class="text-muted">
+            Dernier calcul à 12h TU
+        </small>
+
+    </div>
+</div>
+
+{% endif %}
+ {% if param == 'fwi' %}
+<div class="card mb-4">
+    <div class="card-header">
+        Paramètres utilisés pour le calcul du FWI (12h TU)
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        🌡️<br>
+                        <strong>Température</strong>
+                        <h4>{{ dernier_fwi.temp|floatformat:1 }} °C</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        💧<br>
+                        <strong>Humidité</strong>
+                        <h4>{{ dernier_fwi.rh|floatformat:0 }} %</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        🌬️<br>
+                        <strong>Vent</strong>
+                        <h4>{{ dernier_fwi.wind_kmh|floatformat:1 }} km/h</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        🌧️<br>
+                        <strong>Pluie 24h</strong>
+                        <h4>{{ dernier_fwi.rain_24h|floatformat:1 }} mm</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if param == 'et0' and dernier_et0 %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-body d-flex justify-content-between align-items-center">
+
+        <h3 class="fw-bold mb-0">
+            💧 ET0 = {{ dernier_et0.et0|floatformat:2 }} mm/j
+        </h3>
+
+        <div class="text-end">
+            <div style="
+                font-size:1.1rem;
+                font-weight:800;
+                text-transform:uppercase;
+                letter-spacing:1px;
+            ">
+                💧 Calcul journalier ET0
+            </div>
+
+            <small class="text-muted">
+                Dernier calcul disponible
+            </small>
+        </div>
+
+    </div>
+</div>
+{% endif %}
+{% if param == 'et0' %}
+<div class="card mb-4">
+    <div class="card-header">
+        Paramètres utilisés pour le calcul ET0
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        🌡️<br>
+                        <strong>Température moyenne</strong>
+                        <h4>{{ dernier_et0.temp_moy|floatformat:1 }} °C</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        💧<br>
+                        <strong>Humidité moyenne</strong>
+                        <h4>{{ dernier_et0.rh_moy|floatformat:1 }} %</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        ☀️<br>
+                        <strong>Rayonnement moyen</strong>
+                        <h4>{{ dernier_et0.radiation_moy|floatformat:1 }} W/m²</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        🌬️<br>
+                        <strong>Vent moyen</strong>
+                        <h4>{{ dernier_et0.wind_moy|floatformat:1 }} m/s</h4>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
   <!-- Filtres période - INCHANGÉ -->
   <form method="get" class="mb-4">
   <div class="d-flex gap-2 align-items-end">
@@ -34,6 +211,7 @@
   </div>
 </form>
   <!-- Graphique - INCHANGÉ -->
+
   <div class="card mb-4">
       <div class="card-header">Évolution {{ label }}</div>
       <div class="card-body">

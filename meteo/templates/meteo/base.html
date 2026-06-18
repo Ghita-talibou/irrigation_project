@@ -43,7 +43,7 @@
                 <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                     <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
                 </a>
-                <a class="nav-link {% if active_page == 'temp' %}active{% endif %}" href="{% url 'detail' 'temp' %}">
+                <!--<a class="nav-link {% if active_page == 'temp' %}active{% endif %}" href="{% url 'detail' 'temp' %}">
                     <i class="bi bi-thermometer-half me-2"></i> Température
                 </a>
                 <a class="nav-link {% if active_page == 'hum' %}active{% endif %}" href="{% url 'detail' 'hum' %}">
@@ -60,16 +60,16 @@
                 </a>
                 <a class="nav-link {% if active_page == 'uv' %}active{% endif %}" href="{% url 'detail' 'uv' %}">
                     <i class="bi bi-brightness-high me-2"></i> UV
-                </a>
+                </a>-->
                 <a class="nav-link {% if active_page == 'fwi' %}active{% endif %}" href="{% url 'detail' 'fwi' %}">
                     <i class="bi bi-fire me-2"></i> FWI
                 </a>
                 <a class="nav-link {% if active_page == 'et0' %}active{% endif %}" href="{% url 'detail' 'et0' %}">
                     <i class="bi bi-moisture me-2"></i> ET0
                 </a>
-                <a class="nav-link {% if active_page == 'batterie' %}active{% endif %}" href="{% url 'detail' 'batterie' %}">
+                <!--<a class="nav-link {% if active_page == 'batterie' %}active{% endif %}" href="{% url 'detail' 'batterie' %}">
                     <i class="bi bi-battery-charging me-2"></i> Batterie
-                </a>
+                </a>-->
                 <a class="nav-link {% if active_page == 'lorawan' %}active{% endif %}"
                     href="{% url 'commande_lorawan' %}">
                     <i class="bi bi-broadcast-pin me-2"></i> Commandes LoRaWAN
